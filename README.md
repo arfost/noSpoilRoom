@@ -1,0 +1,1 @@
+A small web app to keep track of the watched episode of series between friends, and stop the spoil.
