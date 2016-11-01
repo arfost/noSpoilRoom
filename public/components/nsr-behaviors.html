@@ -1,0 +1,73 @@
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<script>
+  (() => {
+    'use strict';
+    Polymer.NoSpoilAppBehaviorImpl = {
+      properties: {
+        editableRoomId: {
+          type: String,
+          notify: true
+        }
+      },
+      get isEditable() {
+        return true;
+      },
+      toEditableId(roomId) {
+        return roomId;
+      },
+      edit(event) {
+        if (this.isEditable) {
+          let roomElement = Polymer.dom(event).localTarget;
+          this.editableRoomId = this.toEditableId(roomElement.id);
+          this.$.document.transactionsComplete.then(() => {
+            this.$.editor.open(roomElement);
+          });
+        }
+      },
+      commitChange(event) {
+        var changeCommits;
+        switch (event.detail) {
+          case 'save':
+            changeCommits = this.save();
+            break;
+          case 'delete':
+            changeCommits = this.delete();
+            break;
+          default:
+            changeCommits = Promise.resolve();
+            break;
+        }
+        if (this.$.query && this.$.query.refresh) {
+          changeCommits.then(() => {
+            this.$.query.refresh();
+          });
+        }
+      },
+      save() {
+        if (this.$.document.isNew &&
+            (this.editableRoom.title ||
+             this.editableRoom.body)) {
+          return this.$.document.save(this.roomsPath).then(() => {
+            this.$.document.reset();
+          });
+        }
+        return Promise.resolve();
+      },
+      delete() {
+        if (!this.$.document.isNew) {
+          this.$.document.destroy();
+        }
+        return Promise.resolve();
+      },
+      signOut() {
+        if (this.$.auth) {
+          this.$.auth.signOut();
+        }
+      }
+    };
+    Polymer.NoSpoilAppBehavior = [
+      Polymer.AppNetworkStatusBehavior,
+      Polymer.NoSpoilAppBehaviorImpl
+    ];
+  })();
+</script>

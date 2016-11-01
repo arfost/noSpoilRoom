@@ -1,0 +1,112 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="nsr-room-editor.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<dom-module id="nsr-room-list">
+  <template>
+    <style>
+      :host{
+          background-color: #ffffff;
+      }
+      paper-item {
+        align-items: flex-start;
+      }
+      paper-item > paper-button{
+        align-self: flex-end;
+      }
+      :host > paper-button {
+        margin:10px;
+      }
+    </style>
+    <paper-listbox id="roomList" selected="{{activeRoom}}" attr-for-selected="roomid">
+      <template is="dom-repeat" items="{{profil.rooms}}" as="room">
+        <paper-icon-item roomid="{{room.id}}">
+          <iron-icon icon="settings" on-tap="edit" item-icon></iron-icon>
+          <div>{{room.name}}</div>
+        </paper-icon-item>
+      </template>
+    </paper-listbox>
+    <paper-button
+      raised
+      on-tap="create"
+      disabled="[[!online]]">
+        Create a new room
+    </paper-button>
+    <nsr-room-editor
+        id="editor"
+        on-close="commitChange"
+        on-delete="delete">
+    </nsr-room-editor>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-room-list',
+      behaviors: [
+        Polymer.AppNetworkStatusBehavior
+      ],
+      properties: {
+        signedIn: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        profil:{
+            type:Object
+        },
+        activeRoom:{
+            type:Object,
+            observer:'selectedRoomChanged'
+        }
+      },
+      create() {
+        if (this.online) {
+          //this.editableRoomId = null;
+          this.$.editor.open();
+        }
+      },
+      edit(e) {
+        console.log(e)
+        if (this.online) {
+          var model = e.model;
+          //this.editableRoomId = null;
+          this.$.editor.open(model.get('room'), e.target);
+        }
+      },
+      commitChange:function(e){
+        var newRoom = e.detail;
+        console.log('update', e, this.profil);
+        var temoin = false;
+        for(var room of this.profil.rooms){
+          console.log('tourne', room);
+          if(room.id == newRoom.id){
+            temoin = true;
+            room = newRoom;
+          }
+        }
+        if(!temoin){
+          this.profil.rooms.push(newRoom);
+
+        }
+        this.fire('update', this.profil);
+        console.log('prof', this.profil);
+
+      },
+      delete:function(e){
+        var index = this.profil.rooms.indexOf(e.detail);
+        if (index > -1) {
+            this.profil.rooms.splice(index, 1);
+        }
+        this.fire('update', this.profil);
+        console.log('prof', this.profil);
+
+      },
+      selectedRoomChanged:function(selected){
+        this.fire('roomchange', this.activeRoom);
+        console.log("room changed", selected)
+      }
+    });
+  </script>
+</dom-module>

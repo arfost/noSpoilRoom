@@ -1,0 +1,9 @@
+{
+  "name": "no spoil room",
+  "short_name": "anti spoil",
+  "theme_color": "#2589bd",
+  "background_color": "#E0E0CE",
+  "display": "fullscreen",
+  "scope": "./",
+  "start_url": "/index.html"
+}

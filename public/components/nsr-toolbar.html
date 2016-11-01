@@ -1,0 +1,89 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<dom-module id="nsr-toolbar">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        background-color: var(--paper-blue-500);
+        color: var(--paper-blue-50);
+        padding: 6px 8px;
+        --paper-icon-button-disabled: {
+          color: var(--paper-blue-50);
+        };
+      }
+      h1 {
+        font-size: 14px;
+        flex-grow: 1;
+        margin: 9px 0;
+      }
+      iron-icon {
+        margin-right: 0.5em;
+      }
+      iron-icon:hover,
+      paper-icon-button:hover{
+        color: grey;
+      }
+      @media (min-width: 640px) {
+        iron-icon,
+        paper-icon-button {
+          margin-right: 1.5em;
+        }
+        iron-icon:first-child {
+          margin-left: 1em;
+        }
+      }
+    </style>
+    <iron-icon icon="list" on-tap="toogleRoomList" ></iron-icon>
+    <h1>No spoil room : {{name}}</h1>
+    <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
+    <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
+    <paper-icon-button
+        icon="[[computeLockIcon(signedIn)]]"
+        disabled="[[!signedIn]]"
+        on-tap="lock">
+    </paper-icon-button>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-toolbar',
+      behaviors: [
+        Polymer.AppNetworkStatusBehavior
+      ],
+      properties: {
+        signedIn: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        profil: {
+          type:Object
+        },
+        name:{
+          type:String,
+          computed:'getName(profil, signedIn)'
+        }
+      },
+      computeLockIcon: function(signedIn) {
+        return signedIn ? 'lock-open' : 'lock';
+      },
+      lock: function() {
+        this.fire('sign-out');
+      },
+      getName: function(profil, signedIn){
+        if(!signedIn){
+          return "disconnected"
+        }
+        return this.profil.name ? this.profil.name : this.profil.accountName;
+      },
+      toogleRoomList: function(){
+        console.log('toogle A');
+        this.fire('listtoogle');
+      }
+    });
+  </script>
+</dom-module>

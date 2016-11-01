@@ -1,0 +1,118 @@
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="date-aff.html">
+<dom-module id="nsr-room">
+  <template>
+    <style>
+      :host{
+
+      }
+    </style>
+    <firebase-document
+        app-name="noSpoilRoom"
+        path = "{{roomPath}}"
+	      data = "{{room}}"
+        id="dRoom">
+    </firebase-document>
+    <h1 id="title">
+      {{roomId}}
+    </h1>
+    <template is="dom-repeat" items="{{room.messages}}" as="message" sort="_sort">
+      <div class="chat">
+        <span>{{message.author}} : </span>
+        <date-aff time-stamp="{{message.date}}" mode="localFormat"></date-aff>
+        <span> : {{message.text}}</span>
+      </div>
+      <hr>
+    </template>
+    <paper-input id="inputId" label="New message" value="{{message}}" always-float-label on-keydown="checkForEnter"></paper-input>
+    <paper-button on-tap="sendMess">Send</paper-button>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-room',
+      properties: {
+        roomId:{
+          type:String
+        },
+        roomPath:{
+          type: String,
+          computed:'_roomPath(roomId)'
+        },
+        signedIn: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        profil:{
+            type:Object
+        }
+      },
+
+      behaviors: [Polymer.NoSpoilAppBehavior],
+      observers:[
+        'newRoomLoaded(roomPath)'
+      ],
+      newRoomLoaded: function(roomPath){
+        console.log("po entré rapport", this.room);
+        if(this.signedIn){
+          this.$.dRoom.initializeStoredValue().then(() => {
+            console.log("po rapport", this.room, this.$.dRoom.isNew);
+            if(!this.room.firstSignInDate){
+              this.room.firstSignInDate = Date.now();
+              this.room.messages = [];
+              var fullMessage = {
+                "author":"admin",
+                "date":Date.now(),
+                "text":"Welcome to this new room, just give your friends your id to make them join :)"
+              }
+              this.room.messages.push(fullMessage);
+            }
+            this.room.lastSignIn = Date.now();
+            this.saveRoom(this.room);
+          });
+        }
+      },
+      _roomPath: function(roomId) {
+        if(!roomId){
+          return '/';
+        }
+        console.log("new demand of path rapport", '/rooms/' + roomId);
+        return '/rooms/' + roomId;
+      },
+      eventSaveRoom: function(e){
+        console.log("event save room", e)
+        this.saveRoom(e.detail);
+      },
+      saveRoom:function(newRoom){
+        console.log("save", newRoom);
+        this.$.dRoom.data = newRoom;
+        this.$.dRoom.save('/rooms/', this.roomId);
+      },
+      sendMess: function(){
+        console.log("new mess", this.message);
+        if(this.message && this.message != ""){
+          var fullMessage = {
+            "author":this.profil.name ? this.profil.name : this.profil.accountName,
+            "date":Date.now(),
+            "text":this.message
+          }
+          this.room.messages.push(fullMessage);
+          this.message = "";
+          this.saveRoom(this.room);
+        }
+      },
+      checkForEnter: function (e) {
+          // check if 'enter' was pressed
+          if (e.keyCode === 13) {
+              this.sendMess();
+          }
+      },
+      _sort: function(a, b){
+        return (new Date(b.date)>new Date(a.date))-(new Date(b.date)<new Date(a.date));
+      }
+    })
+  </script>
+</dom-module>

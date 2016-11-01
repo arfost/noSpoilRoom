@@ -1,0 +1,128 @@
+<link rel="import" href="bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="components/nsr-elements.html">
+<dom-module id="no-spoil-room">
+  <template>
+    <style include="nsr-shared-styles"></style>
+    <style>
+      .container{
+        background-color: var(--paper-blue-100);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start ;
+      }
+      .room-list{
+        align-self: flex-start;
+        flex-basis: 20%;
+        flex-grow: 1; /* default 0 */
+      }
+      .room-repre{
+        align-self: flex-start;
+        flex-grow: 3; /* default 0 */
+      }
+    </style>
+    <firebase-auth
+        id="auth"
+        app-name="noSpoilRoom"
+        provider="google"
+        signed-in="{{signedIn}}"
+        user="{{user}}">
+    </firebase-auth>
+    <firebase-document
+        app-name="noSpoilRoom"
+        path = "{{profilPath}}"
+	      data = "{{profil}}"
+        id="dProfil">
+    </firebase-document>
+    <nsr-toolbar
+      profil="[[profil]]"
+      signed-in="[[signedIn]]"
+      on-listtoogle="toggleRoomList"
+      on-sign-out="signOut">
+    </nsr-toolbar>
+    <nsr-login
+      on-sign-in="signIn"
+      signed-in="[[signedIn]]"
+      disabled="[[!online]]">
+    </nsr-login>
+    <div class="container">
+      <nsr-room-list
+        class="room-list"
+        on-update="eventSaveProfil"
+        on-roomchange="updateSelectedRoom"
+        active-room="{{profil.activeRoom}}"
+        profil="{{profil}}"
+        hidden$="{{!roomListOpen}}">
+      </nsr-room-list>
+      <nsr-room
+        class="room-repre"
+        room-id="{{profil.activeRoom}}"
+        signed-in="[[signedIn]]"
+        profil="{{profil}}">
+      </nsr-room>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'no-spoil-room',
+      properties:{
+        profilPath:{
+          type: String,
+          computed:'_profilPath(user)'
+        }
+      },
+
+      behaviors: [Polymer.NoSpoilAppBehavior],
+      observers:[
+        'newProfilLoaded(profilPath)'
+      ],
+      signIn: function() {
+        this.$.auth.signInWithRedirect();
+      },
+      newProfilLoaded: function(profilPath){
+        //console.log("po rapport", this.profil, this.user);
+        if(this.signedIn){
+          this.$.dProfil.initializeStoredValue().then(() => {
+            //console.log("po rapport", this.profil, this.user);
+            if(!this.profil.firstSignInDate){
+              this.profil.firstSignInDate = Date.now();
+              this.profil.rooms = [{"name":"salle commune","id":"roomid01"}];
+            }
+            this.profil.lastSignIn = Date.now();
+            this.profil.accountName = this.user.displayName;
+            this.saveProfil(this.profil);
+          });
+        }
+      },
+      _profilPath: function(user) {
+        if(!user){
+          return '/';
+        }
+        //console.log("new demand of path rapport", '/profils/' + user.uid);
+        return '/profils/' + user.uid;
+      },
+      eventSaveProfil: function(e){
+        //console.log("event save profil", e)
+        this.saveProfil(e.detail);
+      },
+      updateSelectedRoom: function(e){
+        //console.log("event selected room", e);
+        this.profil.activeRoom = e.detail;
+        this.saveProfil(this.profil);
+      },
+      toggleRoomList:function(){
+        console.log("togle B")
+        if(!this.roomListOpen){
+          this.roomListOpen = true;
+        }else{
+          this.roomListOpen = false;
+        }
+      },
+      saveProfil:function(newProfil){
+        this.$.dProfil.data = newProfil;
+        this.$.dProfil.save(/profils/, this.user.uid);
+      }
+    });
+  </script>
+</dom-module>

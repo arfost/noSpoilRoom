@@ -1,0 +1,59 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="nsr-room-list.html">
+
+<link rel="import" href="shared-style.html">
+<dom-module id="date-aff">
+  <template>
+    <style>
+
+    </style>
+    <span id="text">{{transformedTxt}}</span>
+  </template>
+  <script>
+    Polymer({
+      is: 'date-aff',
+
+      properties: {
+        timeStamp: {
+          type: Number,
+          observer:'changeTxt'
+        },
+        mode:{
+          type:String,
+          value:"UTC"
+        },
+        local:{
+          type:String,
+          value:"FR-fr"
+        },
+        transformedTxt:{
+          type:String,
+          computed:'changeTxt(timeStamp, mode, local)'
+        }
+      },
+      changeTxt: function(timeStamp, mode, local){
+        switch(mode) {
+          case "UTC":
+              return new Date(timeStamp).toUTCString();
+              break;
+          case "localFormat":
+              var d = new Date(timeStamp);
+              return d.toLocaleDateString(local) + " " + d.toLocaleTimeString(local);
+              break;
+          case "dateFormat":
+              var d = new Date(timeStamp);
+              return d.toLocaleDateString(local);
+              break;
+          case "timeFormat":
+              var d = new Date(timeStamp);
+              return d.toLocaleTimeString(local);
+              break;
+        }
+      }
+    });
+  </script>
+</dom-module>
