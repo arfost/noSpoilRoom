@@ -38,8 +38,9 @@
     <nsr-toolbar
       profil="[[profil]]"
       signed-in="[[signedIn]]"
-      on-listtoogle="toggleRoomList"
-      on-sign-out="signOut">
+      on-list-toogle="toggleRoomList"
+      on-sign-out="signOut"
+      on-profil-updated="eventSaveProfil">
     </nsr-toolbar>
     <nsr-login
       on-sign-in="signIn"
@@ -52,8 +53,8 @@
         on-update="eventSaveProfil"
         on-roomchange="updateSelectedRoom"
         active-room="{{profil.activeRoom}}"
-        profil="{{profil}}"
-        hidden$="{{!roomListOpen}}">
+        profil="[[profil]]"
+        hidden$="[[!roomListOpen]]">
       </nsr-room-list>
       <nsr-room
         class="room-repre"

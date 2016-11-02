@@ -24,7 +24,7 @@
     <paper-listbox id="roomList" selected="{{activeRoom}}" attr-for-selected="roomid">
       <template is="dom-repeat" items="{{profil.rooms}}" as="room">
         <paper-icon-item roomid="{{room.id}}">
-          <iron-icon icon="editor:mode-edit" on-tap="edit" item-icon></iron-icon>
+          <iron-icon icon="create" on-tap="edit" item-icon></iron-icon>
           <div>{{room.name}}</div>
         </paper-icon-item>
       </template>
