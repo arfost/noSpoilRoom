@@ -88,6 +88,7 @@
             if(!this.profil.firstSignInDate){
               this.profil.firstSignInDate = Date.now();
               this.profil.rooms = [{"name":"salle commune","id":"roomid01"}];
+              this.profil.uid = this.user.uid;
             }
             this.profil.lastSignIn = Date.now();
             this.profil.accountName = this.user.displayName;
@@ -121,7 +122,7 @@
       },
       saveProfil:function(newProfil){
         this.$.dProfil.data = newProfil;
-        this.$.dProfil.save(/profils/, this.user.uid);
+        this.$.dProfil.save('/profils/', this.user.uid);
       }
     });
   </script>

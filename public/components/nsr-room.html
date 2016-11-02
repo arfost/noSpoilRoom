@@ -19,9 +19,9 @@
     <h1 id="title">
       {{roomId}}
     </h1>
-    <template is="dom-repeat" items="{{room.messages}}" as="message" sort="_sort">
+    <template is="dom-repeat" items="{{room.messages}}" as="message" sort="_sort" id="chatArray">
       <div class="chat">
-        <span>{{message.author}} : </span>
+        <span>{{_getNameForUser(message.author)}} : </span>
         <date-aff time-stamp="{{message.date}}" mode="localFormat"></date-aff>
         <span> : {{message.text}}</span>
       </div>
@@ -50,10 +50,12 @@
             type:Object
         }
       },
-
       behaviors: [Polymer.NoSpoilAppBehavior],
       observers:[
-        'newRoomLoaded(roomPath)'
+        'newRoomLoaded(roomPath)',
+        '_updateUserName(profil.name)',
+        '_updateUserName(profil.accountName)',
+        '_updateChat(room.users.*)'
       ],
       newRoomLoaded: function(roomPath){
         console.log("po entré rapport", this.room);
@@ -69,9 +71,15 @@
                 "text":"Welcome to this new room, just give your friends your id to make them join :)"
               }
               this.room.messages.push(fullMessage);
+
+              this.room.users = [];
+              this.room.users.push({
+                  "name":this.profil.name ? this.profil.name : this.profil.accountName,
+                  "uid":this.profil.uid
+              })
             }
             this.room.lastSignIn = Date.now();
-            this.saveRoom(this.room);
+            this._updateUserName();
           });
         }
       },
@@ -82,20 +90,34 @@
         console.log("new demand of path rapport", '/rooms/' + roomId);
         return '/rooms/' + roomId;
       },
+      _updateUserName: function(){
+        if (!this.room.users){
+          return;
+        }
+        for(var user of this.room.users){
+          if(user.uid == this.profil.uid){
+            user.name = this.profil.name ? this.profil.name : this.profil.accountName;
+          }
+        }
+        this.saveRoom();
+      },
+      _updateChat: function(){
+        this.$.chatArray.render();
+      },
       eventSaveRoom: function(e){
         console.log("event save room", e)
         this.saveRoom(e.detail);
       },
       saveRoom:function(newRoom){
         console.log("save", newRoom);
-        this.$.dRoom.data = newRoom;
+        this.$.dRoom.data = !newRoom ? this.room : newRoom;
         this.$.dRoom.save('/rooms/', this.roomId);
       },
       sendMess: function(){
         console.log("new mess", this.message);
         if(this.message && this.message != ""){
           var fullMessage = {
-            "author":this.profil.name ? this.profil.name : this.profil.accountName,
+            "author":this.profil.uid,
             "date":Date.now(),
             "text":this.message
           }
@@ -105,13 +127,24 @@
         }
       },
       checkForEnter: function (e) {
-          // check if 'enter' was pressed
           if (e.keyCode === 13) {
               this.sendMess();
           }
       },
       _sort: function(a, b){
         return (new Date(b.date)>new Date(a.date))-(new Date(b.date)<new Date(a.date));
+      },
+      _getNameForUser: function(uid){
+        if(uid == 'admin'){
+          return 'admin';
+        }
+        var name = 'error';
+        for(var user of this.room.users){
+          if(user.uid == uid){
+            name = user.name;
+          }
+        }
+        return name;
       }
     })
   </script>
