@@ -1,0 +1,89 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="nsr-room-list.html">
+<dom-module id="nsr-add-show">
+  <template>
+    <style>
+      .wrapper{
+          margin: 10px;
+          min-width: 300px;
+          max-width: 500px;
+      }
+    </style>
+    <firebase-query
+        id="query"
+        app-name="noSpoilRoom"
+        path="/referencesSeries/names"
+        data="{{seriesRef}}">
+    </firebase-query>
+    <firebase-document
+        app-name="noSpoilRoom"
+        id="dRefSerie">
+    </firebase-document>
+    <div class="wrapper">
+        <paper-input 
+            id="inputId" 
+            label="Search" 
+            value="{{filterVal}}" 
+            always-float-label
+            class="search" >
+        </paper-input>
+        <template id="list" is="dom-repeat" items="[[seriesRef]]" as="serieRef" filter="[[_filter(filterVal)]]">
+            <div class="list-item" on-tap="_chooseSerie">
+                [[serieRef.name]]
+            </div>
+            <hr>
+        </template>
+        <div class="validate" hidden$="[[!isChoosedSerie]]">
+            [[choosedSerie.name]]
+            <paper-button on-tap="_validate">Valider</paper-button>
+        </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-add-show',
+      properties: {
+        choosedSerie: {
+          type: Object
+        },
+        seriesRef: {
+            type: Array
+        },
+        filterVal:{
+            type:String,
+            value:""
+        }
+      },
+      observers:[
+          'seriesRefChanged(seriesRef)'
+      ],
+      seriesRefChanged: function(seriesRef){
+          console.log("serie ref : ",seriesRef)
+      },
+      _filter: function(filterVal){
+          return function(item){
+              return item.name.indexOf(filterVal) !== -1 || filterVal == "";
+          }
+      },
+      _chooseSerie: function(e){
+          this.choosedSerie = this.$.list.itemForElement(e.target);
+      },
+      _validate: function(){
+          if(this.choosedSerie){
+            this.$.dRefSerie.getStoredValue('/referencesSeries/series/'+this.choosedSerie.id).then(function(value){
+                this.fire('add-serie', value)
+            }.bind(this))
+          }
+      },
+      isChoosedSerie: function(){
+          return !this.choosedRoom;
+      }
+    });
+  </script>
+</dom-module>
