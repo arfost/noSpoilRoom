@@ -1,0 +1,125 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="shared-style.html">
+<dom-module id="nsr-episode">
+  <template>
+    <style>
+      .ok{
+        color: green;
+      }
+      .selfDanger{
+        color:red;
+      }
+      .otherDanger{
+        color:orange;
+      }
+    </style>
+    <div class$="[[state]]">
+      {{episode.titre}} <paper-icon-button
+          icon="[[computeCheckClass(checked)]]"
+          on-tap="checkTap">
+      </paper-icon-button>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-episode',
+
+      properties: {
+        episode:{
+            type:Object
+        },
+        profil:{
+          type:Object
+        },
+        checked:{
+          type:Boolean,
+          computed:'computeChecked(episode.userOk.*)'
+        },
+        state:{
+          type:String,
+          computed:'computeState(episode.userOk.*)',
+          observer:'stateChanged'
+        },
+        nbUser:{
+          type:Number
+        },
+        action:{
+          type:String,
+          observer:'actionChanged'
+        }
+      },
+      stateChanged:function(newState, oldState){
+        if(newState != oldState){
+          this.fire('state-changed', {"state":this.state, "numero":this.episode.numero});
+        }
+      },
+      actionChanged:function(newAction, oldAction){
+          if(this.action == "check" && !this.checked){
+            this.checkTap();
+            
+          }
+      },
+      computeCheckClass: function(checked) {
+        return checked ? 'check' : 'check-box-outline-blank';
+      },
+      checkTap:function(){
+        if(!this.episode.userOk){
+          this.episode.userOk = [];
+        }
+
+        var validate = false;
+        for(var user of this.episode.userOk){
+          if(user.uid == this.profil.uid){
+            validate = user;
+          }
+        }
+        if(validate){
+          var index = this.episode.userOk.indexOf(validate);
+          this.splice('episode.userOk', index, 1);
+        }else{
+          var validate = {
+            uid:this.profil.uid,
+            checkDate: Date.now()
+          }
+          this.push('episode.userOk', validate);
+        }
+        this.fire('save-room');
+
+      },
+      computeChecked: function(episode){
+        ////console.log("compute checked")
+        if(!this.episode.userOk || !this.profil){
+          ////console.log("compute checked error")
+          return false;
+        }
+        var checked = false;
+        for(var user of this.episode.userOk){
+          if(user.uid == this.profil.uid){
+            checked = true;
+          }
+        }
+        return checked;
+      },
+      computeState: function(episode){
+        ////console.log("check state", this.nbUser, this.episode);
+        if(!this.profil || !this.episode || !this.episode.userOk){
+          return '';
+        }
+        if(this.nbUser == this.episode.userOk.length){
+          return 'ok';
+        }else{
+          var isIn = false;
+          for(var user of this.episode.userOk){
+            if(user.uid == this.profil.uid){
+              isIn = true;
+            }
+          }
+          return isIn ? 'selfDanger' : 'otherDanger'
+        }
+      }
+    });
+  </script>
+</dom-module>

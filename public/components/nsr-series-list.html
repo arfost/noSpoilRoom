@@ -1,0 +1,45 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="nsr-serie.html">
+<link rel="import" href="shared-style.html">
+<dom-module id="nsr-series-list">
+  <template>
+    <style>
+        .serie{
+            margin:5px;
+            padding: 5px;
+            min-width: 25%;
+            
+        }
+        :host{
+            align-content: flex-start;
+            align-items: flex-start;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+    </style>
+    <template is="dom-repeat" items="[[series]]" as="serie">
+        <paper-card class="serie">
+            <nsr-serie nb-user="[[nbUser]]" profil="{{profil}}" serie="{{serie}}"></nsr-serie>
+        </paper-card>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-series-list',
+
+      properties: {
+        series:{
+            type:Array
+        },
+        profil:{
+          type:Object
+        },
+        nbUser:{
+          type:Number
+        }
+      }
+    });
+  </script>
+</dom-module>

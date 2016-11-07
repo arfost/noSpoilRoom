@@ -43,7 +43,7 @@
       }
     </style>
     <iron-icon icon="list" on-tap="toogleRoomList" ></iron-icon>
-    <h1>No spoil room : <span hidden$="[[edit]]">{{name}} <iron-icon icon="create" on-tap="_goEdit"></iron-icon></span><span hidden$="[[!edit]]"><paper-input id="inputName" label="Your name" required auto-validate error-message="needs some text!" always-float-label value="{{newName}}" on-keydown="_finishEdit"></paper-input></span></h1>
+    <h1>No spoil room : <span hidden$="[[edit]]">{{name}} <iron-icon hidden$="[[!signedIn]]" icon="create" on-tap="_goEdit"></iron-icon></span><span hidden$="[[!edit]]"><paper-input id="inputName" label="Your name" required auto-validate error-message="needs some text!" always-float-label value="{{newName}}" on-keydown="_finishEdit"></paper-input></span></h1>
     <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
     <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
     <paper-icon-button

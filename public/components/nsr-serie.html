@@ -1,0 +1,112 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="nsr-saison.html">
+<link rel="import" href="shared-style.html">
+<dom-module id="nsr-serie">
+  <template>
+    <style>
+        .ok{
+        color: green;
+      }
+      .selfDanger{
+        color:red;
+      }
+      .otherDanger{
+        color:orange;
+      }
+      .titre{
+          text-align: center;
+      }
+      .saisons{
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin: 5px;
+      }
+      .saison{
+          flex-basis: auto;
+          flex-grow: 1;
+          flex-shrink: 0;
+          padding: 5px;
+          min-width: 33%%;
+      }
+    </style>
+    <div class$="titre [[state]]"><h1>{{serie.titre}}<paper-icon-button
+          icon="[[computeOpenIcon(open)]]"
+          on-tap="switchOpen" style="float:right;bottom:10px">
+      </paper-icon-button></h1>
+    </div>
+    <div hidden$="[[!open]]" class="saisons">
+        <template is="dom-repeat" items="[[serie.saisons]]" as="saison">
+            <nsr-saison class="saison" on-state-changed="saisonStateChanged" nb-user="[[nbUser]]" profil="{{profil}}" saison="{{saison}}"></nsr-saison>
+        </template>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-serie',
+
+      properties: {
+        serie:{
+            type:Object
+        },
+        profil:{
+          type:Object
+        },
+        nbUser:{
+          type:Number
+        },
+        saisonState:Array,
+        open:{
+            type:Boolean,
+            value: false
+        }
+      },
+      ready: function(){
+        this.saisonState = [];
+        for(var saison of this.serie.saisons){
+          this.saisonState[saison.numero] = '';
+        }
+      },
+      saisonStateChanged: function(e, args){
+        this.saisonState[args.numero] = args.state;
+        this.computeState();
+        //console.log("saison state change", this.saisonState);
+      },
+      computeState: function(){
+        //console.log("saison state computed 1", this.state);
+        var state = "";
+        for(var saison of this.saisonState){
+          //console.log("saison state computed b", saison);
+          switch(saison) {
+            case "ok":
+                if(state == ""){
+                  state = "ok";
+                }
+                break;
+            case "otherDanger":
+                if(state != "selfDanger"){
+                  state = "otherDanger";
+                }
+                break;
+            case "selfDanger":
+                  state = "selfDanger";
+                break;
+          }
+          //console.log("saison state computed", state);
+          this.state = state;
+        }
+      },
+      computeOpenIcon: function(open){
+          return !open ? 'arrow-downward' : 'arrow-upward';
+      },
+      switchOpen: function(){
+          this.open = !this.open;
+      }
+    });
+  </script>
+</dom-module>

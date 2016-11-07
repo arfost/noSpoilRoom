@@ -1,0 +1,101 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="nsr-episode.html">
+<link rel="import" href="shared-style.html">
+<dom-module id="nsr-saison">
+  <template>
+    <style>
+      .ok{
+        color: green;
+      }
+      .selfDanger{
+        color:red;
+      }
+      .otherDanger{
+        color:orange;
+      }
+    </style>
+    <div class$="[[state]]"><h3>Saison {{saison.numero}}<paper-icon-button
+          icon="done-all"
+          on-tap="checkAllEpisodes">
+          </paper-icon-button>
+          <paper-icon-button
+          icon="[[computeOpenIcon(open)]]"
+          on-tap="switchOpen">
+      </paper-icon-button></h3>
+    </div>
+    <div hidden$="[[!open]]">
+      <template id="episodeList" is="dom-repeat" items="[[saison.episodes]]" as="episode" sort="{{episode.numero}}">
+          <nsr-episode action="{{action}}" on-state-changed="episodeStateChanged" nb-user="[[nbUser]]" profil="{{profil}}" episode="{{episode}}"></nsr-episode>
+      </template>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-saison',
+
+      properties: {
+        saison:{
+            type:Object
+        },
+        profil:{
+          type:Object
+        },
+        nbUser:{
+          type:Number
+        },
+        episodeState:Array,
+        open:{
+            type:Boolean,
+            value: false
+        }
+      },
+      ready: function(){
+        this.episodeState = [];
+        for(var episode of this.saison.episodes){
+          this.episodeState[episode.numero] = '';
+        }
+      },
+      checkAllEpisodes: function(){
+        this.action = "check";
+      },
+      episodeStateChanged: function(e, args){
+        this.episodeState[args.numero] = args.state;
+        this.computeState();
+        //console.log("episode state change", this.episodeState);
+      },
+      computeState: function(){
+        //console.log("saison state computed 1", this.state);
+        var state = "";
+        for(var episode of this.episodeState){
+          //console.log("saison state computed b", episode);
+          switch(episode) {
+            case "ok":
+                if(state == ""){
+                  state = "ok";
+                }
+                break;
+            case "otherDanger":
+                if(state != "selfDanger"){
+                  state = "otherDanger";
+                }
+                break;
+            case "selfDanger":
+                  state = "selfDanger";
+                break;
+          }
+          //console.log("saison state computed", state);
+          this.state = state;
+        }
+      },
+      computeOpenIcon: function(open){
+          return !open ? 'arrow-downward' : 'arrow-upward';
+      },
+      switchOpen: function(){
+          this.open = !this.open;
+      }
+    });
+  </script>
+</dom-module>
