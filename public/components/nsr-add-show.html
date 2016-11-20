@@ -14,6 +14,10 @@
           min-width: 300px;
           max-width: 500px;
       }
+      .list-serie{
+        max-height: 500px;
+        overflow: auto;
+      }
     </style>
     <firebase-query
         id="query"
@@ -26,19 +30,21 @@
         id="dRefSerie">
     </firebase-document>
     <div class="wrapper">
-        <paper-input 
-            id="inputId" 
-            label="Search" 
-            value="{{filterVal}}" 
+        <paper-input
+            id="inputId"
+            label="Search"
+            value="{{filterVal}}"
             always-float-label
             class="search" >
         </paper-input>
-        <template id="list" is="dom-repeat" items="[[seriesRef]]" as="serieRef" filter="[[_filter(filterVal)]]">
-            <div class="list-item" on-tap="_chooseSerie">
-                [[serieRef.name]]
-            </div>
-            <hr>
-        </template>
+        <div class="list-serie">
+          <template id="list" is="dom-repeat" items="[[seriesRef]]" as="serieRef" filter="[[_filter(filterVal)]]">
+              <div class="list-item" on-tap="_chooseSerie">
+                  [[serieRef.name]]
+              </div>
+              <hr>
+          </template>
+        </div>
         <div class="validate" hidden$="[[!isChoosedSerie]]">
             [[choosedSerie.name]]
             <paper-button on-tap="_validate">Valider</paper-button>
@@ -68,7 +74,7 @@
       },
       _filter: function(filterVal){
           return function(item){
-              return item.name.indexOf(filterVal) !== -1 || filterVal == "";
+              return item.name.toLowerCase().indexOf(filterVal) !== -1 || filterVal == "";
           }
       },
       _chooseSerie: function(e){

@@ -137,11 +137,11 @@
         this.$.chatArray.render();
       },
       eventSaveRoom: function(e){
-        ////console.log("event save room", e)
+        console.log("event save room", e)
         this.saveRoom(e.detail);
       },
       saveRoom:function(newRoom){
-        ////console.log("save", newRoom);
+        console.log("save", newRoom, this.room);
         this.$.dRoom.data = (!newRoom || Object.keys(newRoom).length === 0 || newRoom == null)? this.room : newRoom;
         this.$.dRoom.save('/rooms/', this.roomId);
       },
