@@ -9,7 +9,7 @@
         display: none;
         position: absolute;
         overflow: hidden;
-        top: 46px;
+        top: 120px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -44,7 +44,7 @@
       #roomDiv {
         display: block;
         position: absolute;
-        max-width: 500px;
+        max-width: 250px;
         margin: auto;
       }
       :host(.open) #roomDiv {
@@ -57,7 +57,7 @@
         position: relative;
         margin: 10px auto;
         width: calc(100vw - 20px);
-        max-width: 480px;
+        max-width: 230px;
         @apply(--layout-horizontal);
         @apply(--layout-center);
         justify-content: space-between;
@@ -71,7 +71,7 @@
     <div id="background"></div>
     <div id="roomDiv" class="room">
       <paper-input id="inputName" label="Your name for the room" required auto-validate error-message="needs some text!" always-float-label value="{{room.name}}"></paper-input>
-      <paper-input id="inputId" label="The room id. Enter antyhing to create one or an existing one to join" required auto-validate error-message="needs some text!" value="{{room.id}}" always-float-label></paper-input>
+      <paper-input id="inputId" label="The room id. New or existing" required auto-validate error-message="needs some text!" value="{{room.id}}" always-float-label></paper-input>
     </div>
     <div class="controls">
       <paper-button id="btnDelete" on-tap="delete">Delete</paper-button>
@@ -132,24 +132,24 @@
       },
       transitionInFrom(rect) {
         var targetRect = this.getBoundingClientRect();
-        var targetLeft = targetRect.width > 500 ?
-            targetRect.width / 2 - 240 : 10;
-        var targetWidth = targetRect.width > 500 ?
-            '480px' : 'calc(100vw - 20px)'
+        var targetLeft = targetRect.width > 250 ?
+            targetRect.width / 2 - 128 : 10;
+        var targetWidth = targetRect.width > 250 ?
+            '230px' : 'calc(50vw - 20px)'
         var roomAnimation = this.$.roomDiv.animate([{
-          transform: `translate(${rect.left}px,${rect.top - 46}px)`,
+          transform: `translate(${rect.left}px,${rect.top - 120}px)`,
           width: `${rect.width}px`,
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
         }, {
           transform: `translate(${targetLeft}px, 0px)`,
           width: targetWidth
-        }], 500);
+        }], 250);
         var backgroundAnimation = this.$.background.animate([{
-          transform: `translate(${rect.left + rect.width / 2 - 128}px, ${rect.top - 46 + rect.height / 2 - 128}px) scale(0.1)`,
+          transform: `translate(${rect.left + rect.width / 2 - 128}px, ${rect.top - 46 + rect.height / 2 - 64}px) scale(0.1)`,
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
         }, {
-          transform: `scale(${targetRect.width / 256 * 4})`
-        }], 800);
+          transform: `scale(${targetRect.width / 128 * 4})`
+        }], 400);
         roomAnimation.addEventListener('finish', () => {
           Polymer.dom(this).classList.add('open');
         });

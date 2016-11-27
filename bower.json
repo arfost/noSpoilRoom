@@ -30,7 +30,10 @@
     "paper-input": "PolymerElements/paper-input#^1.1.20",
     "paper-card": "PolymerElements/paper-card#^1.1.4",
     "paper-dialog": "PolymerElements/paper-dialog#^1.1.0",
-    "neon-animation": "PolymerElements/neon-animation#^1.2.4"
+    "neon-animation": "PolymerElements/neon-animation#^1.2.4",
+    "paper-avatar": "NeilujD/paper-avatar#^1.1.0",
+    "app-layout": "PolymerElements/app-layout#^0.10.6",
+    "app-route": "PolymerElements/app-route#^0.9.3"
   },
   "resolutions": {
     "font-roboto": "^1.0.1"

@@ -15,8 +15,13 @@
       .otherDanger{
         color:orange;
       }
+      .episode{
+        width: 100%;
+        padding: 5px;
+        overflow-wrap: break-word;
+      }
     </style>
-    <div class$="[[state]]">
+    <div class$="episode [[state]]">
       {{episode.titre}} <paper-icon-button
           icon="[[computeCheckClass(checked)]]"
           on-tap="checkTap">

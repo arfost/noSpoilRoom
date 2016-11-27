@@ -10,6 +10,10 @@
     <style>
       :host{
           background-color: #ffffff;
+          
+      }
+      .title{
+        padding: 5px;
       }
       paper-item {
         align-items: flex-start;
@@ -21,6 +25,10 @@
         margin:10px;
       }
     </style>
+    <div class="title">
+      <h3>Room List</h3>
+      <div>Here are all the rooms you can join. Add them with the big button above. You can either create one or join if you know the id.</div>
+    </div>
     <paper-listbox id="roomList" selected="{{activeRoom}}" attr-for-selected="roomid">
       <template is="dom-repeat" items="{{profil.rooms}}" as="room">
         <paper-icon-item roomid="{{room.id}}">

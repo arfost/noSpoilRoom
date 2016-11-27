@@ -34,17 +34,24 @@
           padding: 5px;
           min-width: 300px;
       }
+      paper-card{
+        width: 100%;
+        min-height: 120px;
+        padding: 5px
+      }
     </style>
-    <div class$="titre [[state]]" ><h1>{{serie.titre}}<paper-icon-button
-          icon="[[computeOpenIcon(open)]]"
-          on-tap="switchOpen" style="float:right;bottom:10px">
-      </paper-icon-button></h1>
-    </div>
-    <div hidden$="[[!open]]" class="saisons" draggable>
-        <template is="dom-repeat" items="[[serie.saisons]]" as="saison">
-            <nsr-saison class="saison" on-state-changed="saisonStateChanged" nb-user="[[nbUser]]" profil="{{profil}}" saison="{{saison}}"></nsr-saison>
-        </template>
-    </div>
+    <paper-card >
+      <div class$="titre [[state]]" ><h1>{{serie.titre}}<paper-icon-button
+            icon="[[computeopenedIcon(opened)]]"
+            on-tap="switchopened" style="float:right;bottom:10px">
+        </paper-icon-button></h1>
+      </div>
+      <div hidden$="[[!opened]]" class="saisons" draggable>
+          <template is="dom-repeat" items="[[serie.saisons]]" as="saison">
+              <nsr-saison class="saison" on-state-changed="saisonStateChanged" nb-user="[[nbUser]]" profil="{{profil}}" saison="{{saison}}"></nsr-saison>
+          </template>
+      </div>
+    </paper-card >
   </template>
   <script>
     Polymer({
@@ -62,9 +69,10 @@
           type:Number
         },
         saisonState:Array,
-        open:{
+        opened:{
             type:Boolean,
-            value: false
+            value: false,
+            reflectToAttribute:true
         }
       },
       ready: function(){
@@ -102,11 +110,11 @@
           this.state = state;
         }
       },
-      computeOpenIcon: function(open){
-          return !open ? 'arrow-downward' : 'arrow-upward';
+      computeopenedIcon: function(opened){
+          return !opened ? 'arrow-downward' : 'arrow-upward';
       },
-      switchOpen: function(){
-          this.open = !this.open;
+      switchopened: function(){
+          this.opened = !this.opened;
       }
     });
   </script>

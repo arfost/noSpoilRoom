@@ -11,30 +11,29 @@
   <template>
     <style>
         .serie{
-            margin:5px;
-            padding: 5px;
-            min-width: 300px;
-            min-height: 120px;
+            width:32%;
+            margin: 10px 0px;
+        }
+        @media (max-width: 940px) {
+          .serie {
+            width:100%;
+          }
         }
         :host{
             align-content: flex-start;
             align-items: flex-start;
             display: flex;
             flex-wrap: wrap;
-            justify-content: flex-start;
+            justify-content: space-around;
         }
     </style>
     <template is="dom-repeat" items="[[series]]" as="serie">
-        <paper-card class="serie">
-            <nsr-serie nb-user="[[nbUser]]" profil="{{profil}}" serie="{{serie}}"></nsr-serie>
-        </paper-card>
+        <nsr-serie class="serie" nb-user="[[nbUser]]" profil="{{profil}}" serie="{{serie}}"></nsr-serie>
     </template>
     <paper-card class="serie" style="text-align:center">
-        <paper-button onclick="animated.open()">Add another show to the room</paper-button>
+        <paper-button on-tap="open" hidden$="[[opened]]">Add another show to the room</paper-button>
+        <nsr-add-show hidden$="{{!opened}}" on-add-serie="_addSerie"></nsr-add-show>
     </paper-card>
-    <paper-dialog id="animated" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
-      <nsr-add-show on-add-serie="_addSerie"></nsr-add-show>
-    </paper-dialog>
   </template>
   <script>
     Polymer({
@@ -50,6 +49,10 @@
         },
         nbUser:{
           type:Number
+        },
+        opened:{
+          type:Boolean,
+          value:false
         }
       },
       _addSerie:function(e){
@@ -57,9 +60,13 @@
         if(!this.series){
           this.series = [];
         }
+        this.opened = !this.opened;
         //this.series.p
         this.push('series', e.detail);
         this.fire('save-room');
+      },
+      open:function(){
+        this.opened = !this.opened;
       }
     });
   </script>

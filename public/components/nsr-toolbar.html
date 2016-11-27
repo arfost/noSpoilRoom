@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-avatar/paper-avatar.html">
 <dom-module id="nsr-toolbar">
   <template>
     <style>
@@ -21,6 +22,8 @@
         font-size: 14px;
         flex-grow: 1;
         margin: 9px 0;
+        display: flex;
+        align-items: center;
       }
       iron-icon {
         margin-right: 0.5em;
@@ -28,22 +31,27 @@
       paper-input{
         max-width: 300px;
       }
-      iron-icon:hover,
-      paper-icon-button:hover{
-        color: grey;
-      }
-      @media (min-width: 640px) {
-        iron-icon,
-        paper-icon-button {
-          margin-right: 1.5em;
-        }
-        iron-icon:first-child {
-          margin-left: 1em;
-        }
+      paper-avatar{
+        margin-right: 1em;
       }
     </style>
-    <iron-icon icon="list" on-tap="toogleRoomList" ></iron-icon>
-    <h1>No spoil room : <span hidden$="[[edit]]">{{name}} <iron-icon hidden$="[[!signedIn]]" icon="create" on-tap="_goEdit"></iron-icon></span><span hidden$="[[!edit]]"><paper-input id="inputName" label="Your name" required auto-validate error-message="needs some text!" always-float-label value="{{newName}}" on-keydown="_finishEdit"></paper-input></span></h1>
+    <paper-icon-button icon="menu" on-tap="toogleRoomList" drawer-toggle></paper-icon-button>
+    <h1>
+      <paper-avatar image-sizing="contain" image-src="[[picture]]" ></paper-avatar>
+      <span hidden$="[[edit]]">{{name}} <iron-icon hidden$="[[!signedIn]]" icon="create" on-tap="_goEdit"></iron-icon></span>
+      <span hidden$="[[!edit]]">
+        <paper-input 
+          id="inputName" 
+          label="Your name" 
+          required 
+          auto-validate 
+          error-message="needs some text!" 
+          always-float-label 
+          value="{{newName}}" 
+          on-keydown="_finishEdit">
+        </paper-input>
+      </span>
+    </h1>
     <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
     <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
     <paper-icon-button
@@ -74,6 +82,10 @@
         name:{
           type:String,
           computed:'getName(profil, signedIn)'
+        },
+        picture:{
+          type:String,
+          computed:'getPicture(profil, signedIn)'
         }
       },
       computeLockIcon: function(signedIn) {
@@ -88,8 +100,14 @@
         }
         return this.profil.name ? this.profil.name : this.profil.accountName;
       },
+      getPicture: function(profil, signedIn){
+        if(!signedIn){
+          return ""
+        }
+        console.log("new picture : ", this.profil.pic ? this.profil.pic : this.profil.accountPic);
+        return this.profil.pic ? this.profil.pic : this.profil.accountPic;
+      },
       toogleRoomList: function(){
-        console.log('toogle A');
         this.fire('list-toogle');
       },
       _goEdit: function(){

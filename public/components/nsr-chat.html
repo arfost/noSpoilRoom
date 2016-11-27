@@ -1,0 +1,83 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="nsr-room-list.html">
+<dom-module id="nsr-chat">
+  <template>
+    <style>
+      paper-card{
+          width:100%
+      }
+    </style>
+    <paper-card heading="Chat" class="chat">
+      <template is="dom-repeat" items="{{messages}}" as="message" sort="_sort" id="chatArray">
+        <div class="chat">
+          <span>{{_getNameForUser(message.author)}} : </span>
+          <date-aff time-stamp="{{message.date}}" mode="localFormat"></date-aff>
+          <span> : {{message.text}}</span>
+        </div>
+        <hr>
+      </template>
+      <paper-input id="inputId" label="New message" value="{{messageTyped}}" always-float-label on-keydown="checkForEnter"></paper-input>
+      <paper-button on-tap="sendMess">Send</paper-button>
+    </paper-card>
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-chat',
+      properties: {
+        messages:{
+            type:Array,
+            notify:true
+        },
+        users:{
+            type:Array
+        },
+        uid:String
+      },
+      observers:[
+            '_updateChat(users.*)'
+      ],
+      _sort: function(a, b){
+        return (new Date(b.date)>new Date(a.date))-(new Date(b.date)<new Date(a.date));
+      },
+      checkForEnter: function (e) {
+          if (e.keyCode === 13) {
+              this.sendMess();
+          }
+      },
+      sendMess: function(){
+        ////console.log("new mess", this.message);
+        if(this.messageTyped && this.messageTyped != ""){
+          var fullMessage = {
+            "author":this.uid,
+            "date":Date.now(),
+            "text":this.messageTyped
+          }
+          this.push('messages',fullMessage);
+          this.messageTyped = "";
+          this.fire("new-message");
+        }
+      },
+      _updateChat: function(){
+        this.$.chatArray.render();
+      },
+      _getNameForUser: function(uid){
+        if(uid == 'admin'){
+          return 'admin';
+        }
+        var name = 'error';
+        for(var user of this.users){
+          if(user.uid == uid){
+            name = user.name;
+          }
+        }
+        return name;
+      }
+    });
+  </script>
+</dom-module>
