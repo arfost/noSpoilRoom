@@ -28,6 +28,10 @@
 	      data = "{{profil}}"
         id="dProfil">
     </firebase-document>
+    <firebase-document
+        app-name="noSpoilRoom"
+        id="firebaseDocument">
+    </firebase-document>
 
     <app-drawer-layout fullbleed>
       <app-drawer opened$="[[drawerOpened]]" swipe-open>
@@ -76,10 +80,16 @@
         profilPath:{
           type: String,
           computed:'_profilPath(user)'
+        },
+        paramPath:{
+          type:String,
+          value:"toto"
         }
       },
 
-      behaviors: [Polymer.NoSpoilAppBehavior],
+      behaviors: [
+        Polymer.NsrSaveBehavior
+        ],
       observers:[
         'newProfilLoaded(profilPath)'
       ],

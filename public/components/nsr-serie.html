@@ -40,15 +40,21 @@
         padding: 5px
       }
     </style>
+    <firebase-document
+        app-name="noSpoilRoom"
+        path = "/referencesSeries/series/{{serie}}"
+	      data = "{{serieRef}}"
+        id="dRoom">
+    </firebase-document>
     <paper-card >
-      <div class$="titre [[state]]" ><h1>{{serie.titre}}<paper-icon-button
+      <div class$="titre [[state]]" ><h1>{{serieRef.titre}}<paper-icon-button
             icon="[[computeopenedIcon(opened)]]"
             on-tap="switchopened" style="float:right;bottom:10px">
         </paper-icon-button></h1>
       </div>
       <div hidden$="[[!opened]]" class="saisons" draggable>
-          <template is="dom-repeat" items="[[serie.saisons]]" as="saison">
-              <nsr-saison class="saison" on-state-changed="saisonStateChanged" nb-user="[[nbUser]]" profil="{{profil}}" saison="{{saison}}"></nsr-saison>
+          <template is="dom-repeat" items="[[serieRef.saisons]]" as="saisonRef">
+              <nsr-saison path="{{path}}/{{index}}" class="saison" on-state-changed="saisonStateChanged" nb-user="[[nbUser]]" profil="{{profil}}" saison-ref="{{saisonRef}}"></nsr-saison>
           </template>
       </div>
     </paper-card >
@@ -58,7 +64,7 @@
       is: 'nsr-serie',
 
       properties: {
-        serie:{
+        serieRef:{
             type:Object,
             notify:true
         },
@@ -75,9 +81,15 @@
             reflectToAttribute:true
         }
       },
-      ready: function(){
+      observers:[
+        'serieChanged(serieRef.*)'
+      ],
+      serieChanged: function(){
         this.saisonState = [];
-        for(var saison of this.serie.saisons){
+        if(!this.serieRef.saisons){
+          return;
+        }
+        for(var saison of this.serieRef.saisons){
           this.saisonState[saison.numero] = '';
         }
       },

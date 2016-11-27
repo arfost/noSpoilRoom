@@ -1,0 +1,14 @@
+[debug] ----------------------------------------------------------------------
+[debug] Command:      C:\Program Files\nodejs\node.exe C:\Users\arfost\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase serve
+[debug] CLI Version:  3.1.0
+[debug] Platform:     win32
+[debug] Node Version: v7.1.0
+[debug] Time:         Sun Nov 27 2016 13:25:20 GMT+0100 (Paris, Madrid)
+[debug] ----------------------------------------------------------------------
+[debug] 
+[info] Starting Firebase development server...
+[info] 
+[info] Project Directory: E:\nodeProjects\noSpoilRoom
+[info] Public Directory: public
+[info] 
+[info] Server listening at: http://localhost:5000

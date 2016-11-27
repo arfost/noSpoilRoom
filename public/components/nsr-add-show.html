@@ -80,9 +80,7 @@
       },
       _validate: function(){
           if(this.choosedSerie){
-            this.$.dRefSerie.getStoredValue('/referencesSeries/series/'+this.choosedSerie.id).then(function(value){
-                this.fire('add-serie', value)
-            }.bind(this))
+            this.fire('add-serie', this.choosedSerie.id)
           }
       },
       isChoosedSerie: function(){

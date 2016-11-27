@@ -58,9 +58,11 @@
             "date":Date.now(),
             "text":this.messageTyped
           }
-          this.push('messages',fullMessage);
+          //this.push('messages',fullMessage);
           this.messageTyped = "";
-          this.fire("new-message");
+          var push = {};
+          push[this.path] = fullMessage;
+          this.fire("add-push", push);
         }
       },
       _updateChat: function(){

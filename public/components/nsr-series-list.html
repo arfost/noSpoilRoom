@@ -27,8 +27,8 @@
             justify-content: space-around;
         }
     </style>
-    <template is="dom-repeat" items="[[series]]" as="serie">
-        <nsr-serie class="serie" nb-user="[[nbUser]]" profil="{{profil}}" serie="{{serie}}"></nsr-serie>
+    <template is="dom-repeat" items="[[_toArray(series)]]" as="serie">
+        <nsr-serie path="{{path}}/{{serie.name}}" class="serie" nb-user="[[nbUser]]" profil="{{profil}}" serie="{{serie.name}}"></nsr-serie>
     </template>
     <paper-card class="serie" style="text-align:center">
         <paper-button on-tap="open" hidden$="[[opened]]">Add another show to the room</paper-button>
@@ -55,14 +55,25 @@
           value:false
         }
       },
+      _toArray: function(obj) {
+        if(!obj){
+          return [];
+        }
+        return Object.keys(obj).map(function(key) {
+            return {
+                name: key,
+                value: obj[key]
+            };
+        });
+        },
       _addSerie:function(e){
         console.log("pouet ", this.series, e);
         if(!this.series){
-          this.series = [];
+          this.series = {};
         }
         this.opened = !this.opened;
         //this.series.p
-        this.push('series', e.detail);
+        this.series[e.detail] = true;
         this.fire('save-room');
       },
       open:function(){

@@ -1,0 +1,205 @@
+<!--
+@license
+Copyright 2016 Google Inc. All Rights Reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file or at
+https://github.com/firebase/polymerfire/blob/master/LICENSE
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app-script.html">
+<script>
+  (function() {
+    'use strict';
+
+    /** @nsrBehavior Polymer.NsrSaveBehavior */
+    Polymer.NsrSaveBehaviorImpl = {
+      properties: {
+        updatesOffList: {
+          type: Array
+        },
+        replicationList: {
+            type:Array,
+            value:[
+                {
+                    "path":"/viewed",
+                    "targets":[
+                        'rooms/%2/lastChecked/time',
+                        'rooms/%2/lastChecked/user/value-6',
+                        'rooms/%2/lastChecked/titre/(referencesSeries/series/%3/saisons/%4/episodes/%5/titre)'
+                    ]
+                }
+            ]
+        },
+        pushReplicationList: {
+            type:Array,
+            value:[
+                {
+                    "path":"/zorg",
+                    "targets":[
+                        'mess_repli/[paramPath]/*push*/mess/(zorg/%2/%3/text)',
+                        'mess_repli/[paramPath]/*push*/mess/fonc--testLongCall'
+                    ]
+                },
+                {
+                    "path":"/zorg",
+                    "targets":[
+                        'mess_repli/[paramPath]/*push*/user/(messages/%2/%3/author)'
+                    ]
+                }
+            ]
+        }
+      },
+      listeners: {
+        'add-update': 'newUpdateReceived',
+        'add-push': 'newPushReceived'
+      },
+      observers:[
+          'connectionStatusChanged(online)'
+      ],
+      testLongCall:function(pathCall){
+          console.log("long call successfull : ", pathCall);
+      },
+      newUpdateReceived:function(e, details){
+        //console.log("Bien recu boss !!", details);
+        var delayedReplicas = {};
+        for(var update in details){
+            var replica = this._createReplication(update, details[update], this.replicationList);
+            //console.log(replica);
+            for (var attrname in replica){ 
+                if(typeof replica[attrname] === 'string' && replica[attrname].indexOf("/") != -1){
+                   delayedReplicas[attrname] = replica[attrname];
+                }else{ 
+                    details[attrname] = replica[attrname]; 
+                }
+                
+            }
+        }
+        //console.log("After replica", details);
+        this.ref = this.$.firebaseDocument.db.ref("/");
+        this.ref.update(details).then(function(){
+            for(var replica in delayedReplicas){
+                if(typeof delayedReplicas[replica] === 'string'){
+                    this.delayForValue(replica, delayedReplicas[replica]);
+                }else{
+                    delayedReplicas[replica](replica);
+                }
+            }
+        }.bind(this));
+      },
+      newPushReceived:function(e, details){
+        //console.log("Bien recu boss push !!", details);
+        this.ref = this.$.firebaseDocument.db.ref("/");
+        var delayedReplicas = {};
+        var updates = {};
+        var pushsRef = {};
+        for(var push in details){
+            var key = this.ref.child(push).push().key
+            var fullPath = push+"/"+key;
+            updates[fullPath] = details[push];
+            var replica = this._createReplication(fullPath, details[push], this.pushReplicationList);
+            //console.log("statut push after ", updates, replica);
+            for (var attrname in replica){ 
+                var beginPath = attrname.substring(0, attrname.indexOf("*push*"));
+                var realPath = attrname.replace("*push*", pushsRef[beginPath] ? pushsRef[beginPath] : pushsRef[beginPath] = this.ref.child(beginPath).push().key);
+                if((typeof replica[attrname] === 'string' && replica[attrname].indexOf("/") != -1)|| (typeof replica[attrname] === 'function')){
+                    //console.log("real path for ", attrname, realPath, replica[attrname])
+                    delayedReplicas[realPath] = replica[attrname];
+                    //this.delayForValue(realPath, replica[attrname]);
+                }else{ 
+                    updates[realPath] = replica[attrname]; 
+                }
+            }
+            
+        }
+        this.ref.update(updates).then(function(){
+            //console.log("pret a repliquer : ", delayedReplicas)
+            for(var replica in delayedReplicas){
+                if(typeof delayedReplicas[replica] === 'string'){
+                    this.delayForValue(replica, delayedReplicas[replica]);
+                }else{
+                    delayedReplicas[replica](replica);
+                }
+            }
+        }.bind(this));
+        //console.log("After replica", details);
+      },
+      delayForValue:function(path, valuePath){
+        var ref = this.$.firebaseDocument.db.ref("/");
+        ref.child(valuePath).once('value').then(function (snapshot) {
+            //console.log("got value : ", valuePath, snapshot.val())
+            var async_updates = {};
+            async_updates[path] = snapshot.val();
+            ref.update(async_updates);
+        });
+      },
+      connectionStatusChanged:function(){
+          console.log("Internet is moving")
+      },
+      _createReplication:function(path, value, replicationList){
+          var updates = {};
+          for(var replication of replicationList){
+              //console.log("index of " + replication.path + " in " + path, path.indexOf(replication.path),  path.indexOf(replication.path) != -1)
+              if(path.indexOf(replication.path) != -1){
+                  var slicedPath = path.split("/");
+                  for(var target of replication.targets){
+                    var computedRepli = this.constructPath(target, slicedPath);
+                    updates[computedRepli.actualTarget] = (computedRepli.keyValue && value != null) ? computedRepli.keyValue : value;
+                  }
+              }
+          }
+          return updates;
+      },
+      constructPath: function(target, slicedPath){
+          var keyValue = false;
+          var actualTarget = "";
+          for(var node of target.split("/")){
+            if(node.indexOf("%") != -1){
+                var index = node[1];
+                actualTarget += "/"+slicedPath[index];
+            }else if(node.indexOf("value-") != -1){
+                var index = node[6];
+                keyValue = slicedPath[index];
+            }else if(node.indexOf("[") != -1){
+                var value = node.substring(node.indexOf("[")+1, node.indexOf("]"));
+                console.log("value is : ", value,  this.get(value), this.paramPath)
+                actualTarget += "/"+this.get(value);
+            }else if(node.indexOf("(") != -1){
+                var value = target.substring(target.indexOf("(")+1, target.indexOf(")"));
+                //console.log("value is : ", value )
+                keyValue = this.constructPath(value, slicedPath).actualTarget;
+                return {
+                    "actualTarget":actualTarget,
+                    "keyValue":keyValue
+                }
+            }else if(node.indexOf("fonc--") != -1){
+                var value = node.substring(6, node.length);
+                console.log("value is : ", value, this[value] );
+                keyValue = function(target){
+                        console.log("value in closure is : ", value );
+                        this[value](target);
+                    }.bind(this);
+                return {
+                    "actualTarget":actualTarget,
+                    "keyValue":keyValue
+                }
+            }else{
+                actualTarget += "/"+node;
+            }
+        }
+        return {
+            "actualTarget":actualTarget,
+            "keyValue":keyValue
+        }
+      }
+      
+    };
+
+    /** @polymerBehavior */
+    Polymer.NsrSaveBehavior = [
+      Polymer.AppNetworkStatusBehavior,
+      Polymer.NsrSaveBehaviorImpl
+    ];
+  })();
+</script>

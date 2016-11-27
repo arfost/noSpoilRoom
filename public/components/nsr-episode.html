@@ -21,8 +21,14 @@
         overflow-wrap: break-word;
       }
     </style>
+    <firebase-document
+        app-name="noSpoilRoom"
+        path = "/viewed/{{path}}"
+	      data = "{{episodeState}}"
+        id="dEpisodeState">
+    </firebase-document>
     <div class$="episode [[state]]">
-      {{episode.titre}} <paper-icon-button
+      {{episodeRef.titre}} <paper-icon-button
           icon="[[computeCheckClass(checked)]]"
           on-tap="checkTap">
       </paper-icon-button>
@@ -33,20 +39,22 @@
       is: 'nsr-episode',
 
       properties: {
-        episode:{
-            type:Object,
-            notify:true
+        episodeRef:{
+            type:Object
+        },
+        episodeState:{
+            type:Object
         },
         profil:{
           type:Object
         },
         checked:{
           type:Boolean,
-          computed:'computeChecked(episode.userOk.*)'
+          computed:'computeChecked(episodeState.*)'
         },
         state:{
           type:String,
-          computed:'computeState(episode.userOk.*)',
+          computed:'computeState(episodeState.*)',
           observer:'stateChanged'
         },
         nbUser:{
@@ -59,71 +67,46 @@
       },
       stateChanged:function(newState, oldState){
         if(newState != oldState){
-          this.fire('state-changed', {"state":this.state, "numero":this.episode.numero});
+          this.fire('state-changed', {"state":this.state, "numero":this.episodeRef.numero});
         }
       },
       actionChanged:function(newAction, oldAction){
           if(this.action == "check" && !this.checked){
             this.checkTap();
-            
           }
       },
       computeCheckClass: function(checked) {
         return checked ? 'check' : 'check-box-outline-blank';
       },
       checkTap:function(){
-        if(!this.episode.userOk){
-          this.episode.userOk = [];
+        
+        if(!this.episodeState){
+          this.episodeState = {};
         }
 
-        var validate = false;
-        for(var user of this.episode.userOk){
-          if(user.uid == this.profil.uid){
-            validate = user;
-          }
-        }
-        if(validate){
-          var index = this.episode.userOk.indexOf(validate);
-          this.splice('episode.userOk', index, 1);
-        }else{
-          var validate = {
-            uid:this.profil.uid,
-            checkDate: Date.now()
-          }
-          this.push('episode.userOk', validate);
-        }
-        this.fire('save-room');
+        //this.episodeState[this.profil.uid] = !this.episodeState[this.profil.uid] ? Date.now() : null;
+        var updates = {}
+        updates['/viewed/'+this.path+'/'+this.profil.uid] = !this.episodeState[this.profil.uid] ? Date.now() : null;
+        this.fire('add-update', updates);
+        //this.fire('save-room');
       },
-      computeChecked: function(episode){
+      computeChecked: function(episodeState){
         ////console.log("compute checked")
-        if(!this.episode.userOk || !this.profil){
+        if(!this.episodeState || !this.profil){
           ////console.log("compute checked error")
           return false;
         }
-        var checked = false;
-        for(var user of this.episode.userOk){
-          if(user.uid == this.profil.uid){
-            checked = true;
-          }
-        }
-        return checked;
+        return !!this.episodeState[this.profil.uid];
       },
-      computeState: function(episode){
-        ////console.log("check state", this.nbUser, this.episode);
-        if(!this.profil || !this.episode || !this.episode.userOk){
+      computeState: function(episodeState){
+        //console.log("check state", this.nbUser, this.episodeState, Object.keys(this.episodeState).length);
+        if(!this.profil || Object.keys(this.episodeState).length == 0){
           return '';
         }
-        if(this.nbUser == this.episode.userOk.length){
+        if(this.nbUser == Object.keys(this.episodeState).length){
           return 'ok';
-        }else{
-          var isIn = false;
-          for(var user of this.episode.userOk){
-            if(user.uid == this.profil.uid){
-              isIn = true;
-            }
-          }
-          return isIn ? 'selfDanger' : 'otherDanger'
         }
+        return !!this.episodeState[this.profil.uid] ? 'selfDanger' : 'otherDanger'
       }
     });
   </script>

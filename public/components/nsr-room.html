@@ -22,8 +22,14 @@
 	      data = "{{room}}"
         id="dRoom">
     </firebase-document>
-    <nsr-series-list nb-user="[[nbUser]]" series="{{room.series}}" on-save-room="eventSaveRoom" profil="{{profil}}"></nsr-series-list>
-    <nsr-chat messages="[[room.messages]]" users="[[room.users]]" uid="[[profil.uid]]" on-new-message="eventSaveRoom" class="chat"></nsr-chat>
+    <firebase-query
+        app-name="noSpoilRoom"
+        path = "/messages/{{roomId}}"
+	      data = "{{messages}}"
+        id="qMessages">
+    </firebase-query>
+    <nsr-series-list path="{{roomId}}" nb-user="[[nbUser]]" series="{{room.series}}" on-save-room="eventSaveRoom" profil="{{profil}}"></nsr-series-list>
+    <nsr-chat messages="[[messages]]" users="[[room.users]]" uid="[[profil.uid]]" on-new-message="eventSaveRoom" class="chat" path="/messages/{{roomId}}"></nsr-chat>
   </template>
   <script>
     Polymer({

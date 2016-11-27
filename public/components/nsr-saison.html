@@ -17,7 +17,7 @@
         color:orange;
       }
     </style>
-    <div class$="[[state]]"><h3>Saison {{saison.numero}}<paper-icon-button
+    <div class$="[[state]]"><h3>Saison {{saisonRef.numero}}<paper-icon-button
           icon="done-all"
           on-tap="checkAllEpisodes">
           </paper-icon-button>
@@ -27,8 +27,8 @@
       </paper-icon-button></h3>
     </div>
     <div hidden$="[[!open]]">
-      <template id="episodeList" is="dom-repeat" items="[[saison.episodes]]" as="episode" sort="{{episode.numero}}">
-          <nsr-episode action="{{action}}" on-state-changed="episodeStateChanged" nb-user="[[nbUser]]" profil="{{profil}}" episode="{{episode}}"></nsr-episode>
+      <template id="episodeList" is="dom-repeat" items="[[saisonRef.episodes]]" as="episodeRef" sort="{{episodeRef.numero}}">
+          <nsr-episode path="{{path}}/{{index}}" action="{{action}}" on-state-changed="episodeStateChanged" nb-user="[[nbUser]]" profil="{{profil}}" episode-ref="{{episodeRef}}" ></nsr-episode>
       </template>
     </div>
   </template>
@@ -37,7 +37,7 @@
       is: 'nsr-saison',
 
       properties: {
-        saison:{
+        saisonRef:{
             type:Object,
             notify:true
         },
@@ -53,9 +53,15 @@
             value: false
         }
       },
-      ready: function(){
+      observers:[
+        'saisonRefChanged(saisonRef.*)'
+      ],
+      saisonRefChanged: function(){
         this.episodeState = [];
-        for(var episode of this.saison.episodes){
+        if(!this.saisonRef.episodes){
+          return;
+        }
+        for(var episode of this.saisonRef.episodes){
           this.episodeState[episode.numero] = '';
         }
       },
