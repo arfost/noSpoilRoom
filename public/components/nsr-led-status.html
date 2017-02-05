@@ -1,0 +1,56 @@
+<dom-module is="nsr-led-status">
+
+    <template>
+        <style>
+            :host {
+                display: flex;
+            }
+
+            #ledSocket {
+                margin: var(--nsr-led-status-margin, 5px);;
+                opacity: var(--nsr-led-status-opacity, 0.4);
+                width: var(--nsr-led-status-size, 20px);
+                height: var(--nsr-led-status-size, 20px);
+                border-radius: calc(var(--nsr-led-status-size, 20px) / 2);
+                transition: background-color linear .08s;
+                background-color: var(--nsr-led-status-background-color, #000000);
+                box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.6);
+            }
+
+            #ledSocket.powered {
+                opacity: 1;
+                transition: transform linear .08s, background-color linear .08s;
+                background-color: var(--nsr-led-status-background-color-powered, green);
+            }
+        </style>
+        <div id="ledSocket" class$="[[_powerStatus]]">
+
+        </div>
+    </template>
+
+
+    <script>
+        Polymer({
+            is: "nsr-led-status",
+            properties: {
+                /**
+                 * If true, the LED is "powered", light is on
+                 */
+                powered: {
+                    type: Boolean,
+                    value: false
+                },
+                _powerStatus: {
+                    type: String,
+                    computed: "_getPowerStatus(powered)"
+                }
+            },
+            _getPowerStatus: function () {
+                if (this.powered) {
+                    return "powered"
+                }
+                return ""
+            }
+        });
+    </script>
+</dom-module>

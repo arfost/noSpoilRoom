@@ -1,0 +1,78 @@
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="date-aff.html">
+<style include="nsr-shared-styles"></style>
+<dom-module id="nsr-user-list">
+  <template>
+    <style include="nsr-shared-styles"></style>
+    <style>
+      paper-card{
+          width:100%;
+          padding: 5px;
+      }
+      .big{
+        font-size: 1.2em
+      }
+      .little{
+        font-size: 0.8em
+      }
+      .user-flex{
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin: 5px;
+      }
+      .user-flex > paper-avatar{
+        margin-right:5px; 
+      }
+    </style>
+    <paper-card heading="Users" class="chat">
+      <template is="dom-repeat" items="[[users]]" as="user" id="userList">
+        <div class="user-flex">
+          <paper-avatar image-sizing="contain" image-src="[[user.pic]]" ></paper-avatar>
+          <div class$="[[_computeStatus(index, status)]]">
+            <div class="big">{{user.name}}</div>
+            <div class="little">Last connection: <date-aff time-stamp="{{user.lastCheckIn}}" mode="localFormat"></date-aff></div>
+          </div>
+        </div>
+      </template>
+    </paper-card>
+    
+  </template>
+  <script>
+    Polymer({
+      is: 'nsr-user-list',
+      properties: {
+        users:Array,
+        tappedEpisode:{
+          type:Object,
+          observer:'_calculateUserState'
+        },
+        status:{
+          type:Object,
+          value:function(){
+            return [];
+          }
+        }
+      },
+      _calculateUserState:function(){
+        console.log("calculate status : ");
+        for(var i =0; i < this.users.length; i++){
+          var statut = Object.keys(this.tappedEpisode).length > 0 ? "selfDanger" : "";
+          this.status[i] = this.tappedEpisode[this.users[i].uid] ? 'ok' : statut;
+        }
+        //this.$.userList.render();
+        var tmp = this.status;
+        this.set('status', []);
+        this.set('status', tmp);
+      },
+      _computeStatus:function(index){
+        console.log("compute status : ", index, this.status[index]);
+        return this.status[index];
+      }
+    })
+  </script>
+</dom-module>

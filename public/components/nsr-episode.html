@@ -3,21 +3,19 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="shared-style.html">
+<link rel="import" href="nsr-led-status.html">
 <dom-module id="nsr-episode">
   <template>
+    <style include="nsr-shared-styles"></style>
     <style>
-      .ok{
-        color: green;
-      }
-      .selfDanger{
-        color:red;
-      }
-      .otherDanger{
-        color:orange;
-      }
       .episode{
         width: 100%;
         padding: 5px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      .titre{
         overflow-wrap: break-word;
       }
     </style>
@@ -27,11 +25,9 @@
 	      data = "{{episodeState}}"
         id="dEpisodeState">
     </firebase-document>
-    <div class$="episode [[state]]">
-      {{episodeRef.titre}} <paper-icon-button
-          icon="[[computeCheckClass(checked)]]"
-          on-tap="checkTap">
-      </paper-icon-button>
+    <div class$="episode [[state]]" on-tap="episodeTap">
+      <nsr-led-status on-tap="checkTap" powered="{{checked}}"></nsr-led-status>
+      <div class="titre">{{episodeRef.titre}} </div>
     </div>
   </template>
   <script>
@@ -65,6 +61,9 @@
           observer:'actionChanged'
         }
       },
+      episodeTap:function(){
+        this.fire('episode-tap', this.episodeState);
+      },
       stateChanged:function(newState, oldState){
         if(newState != oldState){
           this.fire('state-changed', {"state":this.state, "numero":this.episodeRef.numero});
@@ -83,11 +82,11 @@
         if(!this.episodeState){
           this.episodeState = {};
         }
-
+        this.set('episodeState.'+this.profil.uid, !this.episodeState[this.profil.uid] ? Date.now() : null);
         //this.episodeState[this.profil.uid] = !this.episodeState[this.profil.uid] ? Date.now() : null;
         var updates = {}
-        updates['/viewed/'+this.path+'/'+this.profil.uid] = !this.episodeState[this.profil.uid] ? Date.now() : null;
-        this.fire('add-update', updates);
+        updates['/viewed/'+this.path+'/'+this.profil.uid] = this.episodeState[this.profil.uid];
+        //this.fire('add-update', updates);
         //this.fire('save-room');
       },
       computeChecked: function(episodeState){

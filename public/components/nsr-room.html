@@ -6,14 +6,12 @@
 <link rel="import" href="date-aff.html">
 <link rel="import" href="nsr-chat.html">
 <link rel="import" href="nsr-series-list.html">
+<link rel="import" href="nsr-user-list.html">
 <dom-module id="nsr-room">
   <template>
     <style>
-      :host{
-
-      }
       nsr-chat{
-          width:100%
+          width:100%;
       }
     </style>
     <firebase-document
@@ -28,7 +26,8 @@
 	      data = "{{messages}}"
         id="qMessages">
     </firebase-query>
-    <nsr-series-list path="{{roomId}}" nb-user="[[nbUser]]" series="{{room.series}}" on-save-room="eventSaveRoom" profil="{{profil}}"></nsr-series-list>
+    <nsr-series-list path="{{roomId}}" nb-user="[[nbUser]]" series="{{room.series}}" on-save-room="eventSaveRoom" profil="{{profil}}" on-episode-tap="setUserListEpisode"></nsr-series-list>
+    <nsr-user-list tapped-episode="[[tappedEpisode]]" users="[[room.users]]"></nsr-user-list>
     <nsr-chat messages="[[messages]]" users="[[room.users]]" uid="[[profil.uid]]" on-new-message="eventSaveRoom" class="chat" path="/messages/{{roomId}}"></nsr-chat>
   </template>
   <script>
@@ -53,14 +52,20 @@
         nbUser:{
           type:Number,
           computed:'computeNbUser(room.users.*)'
-        }
+        },
+        tappedEpisode:Object
       },
-      behaviors: [Polymer.NoSpoilAppBehavior],
       observers:[
         'newRoomLoaded(roomPath)',
         '_updateUserName(profil.name)',
-        '_updateUserName(profil.accountName)'
+        '_updateUserName(profil.accountName)',
+        '_updateUserPic(profil.accountPic)',
+        '_updateUserPic(profil.pic)'
       ],
+      setUserListEpisode:function(e, detail){
+        console.log("episode tap", detail);
+        this.set('tappedEpisode', detail);
+      },
       computeNbUser:function(array){
         ////console.log("nb user : ", this.room.users ? this.room.users.length : 0)
         return this.room.users ? this.room.users.length : 0;
@@ -83,6 +88,7 @@
               this.room.users = [];
               this.push('room.users',{
                   "name":this.profil.name ? this.profil.name : this.profil.accountName,
+                  "pic": this.profil.pic ? this.profil.pic : this.profil.accountPic,
                   "uid":this.profil.uid,
                   "lastCheckIn": Date.now()
               });
@@ -92,12 +98,14 @@
                 if(user.uid == this.profil.uid){
                   var temoin = true;
                   user.name = this.profil.name ? this.profil.name : this.profil.accountName;
+                  user.pic = this.profil.pic ? this.profil.pic : this.profil.accountPic;
                   user.lastCheckIn = Date.now()
                 }
               }
               if(!temoin){
                 this.push('room.users',{
                     "name":this.profil.name ? this.profil.name : this.profil.accountName,
+                    "pic": this.profil.pic ? this.profil.pic : this.profil.accountPic,
                     "uid":this.profil.uid,
                     "lastCheckIn": Date.now()
                 });
@@ -122,6 +130,17 @@
         for(var user of this.room.users){
           if(user.uid == this.profil.uid){
             user.name = this.profil.name ? this.profil.name : this.profil.accountName;
+          }
+        }
+        this.saveRoom();
+      },
+      _updateUserPic: function(){
+        if (!this.room.users){
+          return;
+        }
+        for(var user of this.room.users){
+          if(user.uid == this.profil.uid){
+            user.pic = this.profil.pic ? this.profil.pic : this.profil.accountPic;
           }
         }
         this.saveRoom();
