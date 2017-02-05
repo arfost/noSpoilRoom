@@ -40,7 +40,8 @@
           <paper-avatar image-sizing="contain" image-src="[[user.pic]]" ></paper-avatar>
           <div class$="[[_computeStatus(index, status)]]">
             <div class="big">{{user.name}}</div>
-            <div class="little">Last connection: <date-aff time-stamp="{{user.lastCheckIn}}" mode="localFormat"></date-aff></div>
+            <div class="little">Last connection: <date-aff time-stamp="{{user.lastCheckIn}}" mode="localFormat"></date-aff>
+            <div hidden$="[[!_computeShowTime(index, status)]]" class="little">Vu le : <date-aff time-stamp="{{_computeTime(index, status)}}" mode="localFormat"></date-aff></div>
           </div>
         </div>
       </template>
@@ -53,8 +54,7 @@
       properties: {
         users:Array,
         tappedEpisode:{
-          type:Object,
-          observer:'_calculateUserState'
+          type:Object
         },
         status:{
           type:Object,
@@ -63,6 +63,9 @@
           }
         }
       },
+      observers:[
+        '_calculateUserState(tappedEpisode.*)'
+      ],
       _calculateUserState:function(){
         console.log("calculate status : ");
         for(var i =0; i < this.users.length; i++){
@@ -77,6 +80,13 @@
       _computeStatus:function(index){
         console.log("compute status : ", index, this.status[index]);
         return this.status[index];
+      },
+      _computeTime:function(index){
+        return this.tappedEpisode ? this.tappedEpisode[this.users[index].uid] : "";
+      },
+      _computeShowTime:function(index){
+        console.log("pouet ", !!(this.tappedEpisode && !!this.tappedEpisode[this.users[index].uid]))
+        return (this.tappedEpisode && !!this.tappedEpisode[this.users[index].uid]);
       }
     })
   </script>
