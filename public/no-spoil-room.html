@@ -101,14 +101,15 @@
           this.$.dProfil.initializeStoredValue().then(() => {
             //console.log("po rapport", this.profil, this.user);
             if(!this.profil.firstSignInDate){
-              this.profil.firstSignInDate = Date.now();
-              this.profil.rooms = [{"name":"salle commune","id":"roomid01"}];
-              this.profil.uid = this.user.uid;
+              this.set('profil.firstSignInDate',  Date.now());
+              this.set('profil.rooms', [{"name":"salle commune","id":"roomid01"}]);
+              this.set('profil.uid', this.user.uid);
+              this.set('profil.activeRoom', "roomid01");
             }
-            this.profil.lastSignIn = Date.now();
-            this.profil.accountName = this.user.displayName;
-            this.profil.accountPic = this.user.photoURL;
-            this.saveProfil(this.profil);
+            this.set('profil.lastSignIn', Date.now());
+            this.set('profil.accountName', this.user.displayName);
+            this.set('profil.accountPic', this.user.photoURL);
+            //saveProfil(this.profil);
           });
         }
       },
@@ -125,8 +126,8 @@
       },
       updateSelectedRoom: function(e){
         //console.log("event selected room", e);
-        this.profil.activeRoom = e.detail;
-        this.saveProfil(this.profil);
+        this.set('profil.activeRoom', e.detail);
+        //this.saveProfil(this.profil);
       },
       toggleRoomList:function(){
         console.log("togle B")
